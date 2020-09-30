@@ -113,60 +113,38 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
 
     def getAction(self, gameState):
-        """
-        Returns the minimax action from the current gameState using self.depth
-        and self.evaluationFunction.
 
-        Here are some method calls that might be useful when implementing minimax.
-
-        gameState.getLegalActions(agentIndex):
-        Returns a list of legal actions for an agent
-        agentIndex=0 means Pacman, ghosts are >= 1
-
-        gameState.generateSuccessor(agentIndex, action):
-        Returns the successor game state after an agent takes an action
-
-        gameState.getNumAgents():
-        Returns the total number of agents in the game
-
-        gameState.isWin():
-        Returns whether or not the game state is a winning state
-
-        gameState.isLose():
-        Returns whether or not the game state is a losing state
-        """
-        "*** YOUR CODE HERE ***"
 
         def MaxVal(gameState,depth):
 
-            if gameState.isWin() or gameState.isLose():
+            if gameState.isWin() or gameState.isLose(): #Check if in winning state
                 return gameState.getScore()
-            v = -math.inf
+            v = -math.inf #set v value to -infinite
             a = Directions.STOP
-            actions = gameState.getLegalActions(0)
-            for action in actions:
-                v2 = MinVal(gameState.generateSuccessor(0,action),depth,1)
+            actions = gameState.getLegalActions(0) #get all possible moves for pacman in starting position
+            for action in actions: #check every possible move
+                v2 = MinVal(gameState.generateSuccessor(0,action),depth,1) #go to ghost turn
                 if v2>v:
-                    v = v2
+                    v = v2 #get new improved v value
                     a = action
-            if depth == 0:
+            if depth == 0: #if at final depth return the best action
                 return a
             else:
                 return v
 
-        def MinVal(gameState,depth,player):
-            if gameState.isWin() or gameState.isLose():
+        def MinVal(gameState,depth,player): #player is which ghost we are checking for
+            if gameState.isWin() or gameState.isLose(): #check if in a final state (either win or loss)
                 return gameState.getScore()
-            v = math.inf
-            actions = gameState.getLegalActions(player)
-            for action in actions:
+            v = math.inf #set v to infinite
+            actions = gameState.getLegalActions(player) #get possible starting moves for the ghost
+            for action in actions: #check every possible move
                 if player == gameState.getNumAgents() - 1: #if we are on the last ghost
                     if depth == self.depth -1: #if we are at max depth
                         v2 = self.evaluationFunction(gameState.generateSuccessor(player,action))
                     else:
-                        v2 = MaxVal(gameState.generateSuccessor(player,action),depth + 1)
+                        v2 = MaxVal(gameState.generateSuccessor(player,action),depth + 1) #run possible moves for pacman
                 else:
-                    v2 = MinVal(gameState.generateSuccessor(player,action), depth, player + 1)
+                    v2 = MinVal(gameState.generateSuccessor(player,action), depth, player + 1) #next ghost 
                 if v2<v:
                     v=v2
             return v
@@ -178,48 +156,45 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
 
     def getAction(self, gameState):
-        """
-        Returns the minimax action using self.depth and self.evaluationFunction
-        """
-        "*** YOUR CODE HERE ***"
-        alpha=-math.inf
+
+        alpha=-math.inf #define alpha and beta
         beta=math.inf
         def MaxVal(gameState,depth,alpha,beta):
-            if gameState.isWin() or gameState.isLose():
+            if gameState.isWin() or gameState.isLose(): #check if in a finished state
                 return gameState.getScore()
-            v = -math.inf
+            v = -math.inf #set v to - infinite
             a = Directions.STOP
             actions = gameState.getLegalActions(0)
             for action in actions:
-                v2 = MinVal(gameState.generateSuccessor(0,action),depth,1, alpha, beta)
+                v2 = MinVal(gameState.generateSuccessor(0,action),depth,1, alpha, beta) #run the minvalue function for each possible move for pacman
                 if v2>v:
                     v = v2
                     a = action
-                    alpha=max(alpha, v)
+                    alpha=max(alpha, v) #get new alpha value if improved v is found
                 if v > beta:
-                    return v
-            if depth == 0:
+                    return v #if a better beta is found, skip remainding checks in this tree
+            if depth == 0: #if end of depth return "a" value
                 return a
             else:
                 return v
 
-        def MinVal(gameState,depth,player,alpha,beta):
-            if gameState.isWin() or gameState.isLose():
+        def MinVal(gameState,depth,player,alpha,beta): #player is which ghost that is going to move.
+            if gameState.isWin() or gameState.isLose(): #check if in a finished state
                 return gameState.getScore()
-            v = math.inf
-            actions = gameState.getLegalActions(player)
+            v = math.inf #set v to infinite
+            actions = gameState.getLegalActions(player) #get first move for ghost
             for action in actions:
                 if player == gameState.getNumAgents() - 1: #if we are on the last ghost
                     if depth == self.depth -1: #if we are at max depth
-                        v2 = self.evaluationFunction(gameState.generateSuccessor(player,action))
+                        v2 = self.evaluationFunction(gameState.generateSuccessor(player,action)) #assign v2 value
                     else:
-                        v2 = MaxVal(gameState.generateSuccessor(player,action),depth + 1,alpha, beta)
+                        v2 = MaxVal(gameState.generateSuccessor(player,action),depth + 1,alpha, beta) #go to pacmans turn
                 else:
-                    v2 = MinVal(gameState.generateSuccessor(player,action), depth, player + 1, alpha, beta)
+                    v2 = MinVal(gameState.generateSuccessor(player,action), depth, player + 1, alpha, beta) #next ghost
                 if v2<v:
                     v=v2
-                    beta=min(beta,v)
-                if v< alpha:
+                    beta=min(beta,v) #find optimal beta
+                if v< alpha: #skip remainding checks if an alpha value greater than v is found
                     return v
             return v
         return MaxVal(gameState,0,alpha, beta)
