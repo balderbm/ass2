@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -169,7 +169,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     v2 = MinVal(gameState.generateSuccessor(player,action), depth, player + 1)
                 if v2<v:
                     v=v2
-            return v        
+            return v
         return MaxVal(gameState,0)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -182,7 +182,43 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+    def MaxVal(gameState,depth,alpha,beta):
+        if gameState.isWin() or gameState.isLose():
+            return gameState.getScore()
+        v = -math.inf
+        a = Directions.STOP
+        actions = gameState.getLegalActions(0)
+        for action in actions:
+            v2 = MinVal(gameState.generateSuccessor(0,action),depth,1, alpha, beta)
+            if v2>v:
+                v = v2
+                a = action
+                alpha=max(alpha, v)
+        if depth == 0:
+            return a
+        else:
+            return v
+
+    def MinVal(gameState,depth,player,alpha,beta):
+        if gameState.isWin() or gameState.isLose():
+            return gameState.getScore()
+        v = math.inf
+        actions = gameState.getLegalActions(player)
+        for action in actions:
+            if player == gameState.getNumAgents() - 1: #if we are on the last ghost
+                if depth == self.depth -1: #if we are at max depth
+                    v2 = self.evaluationFunction(gameState.generateSuccessor(player,action))
+                else:
+                    v2 = MaxVal(gameState.generateSuccessor(player,action),depth + 1,alpha, beta)
+            else:
+                v2 = MinVal(gameState.generateSuccessor(player,action), depth, player + 1, alpha, beta)
+            if v2<v:
+                v=v2
+        return v
+    return MaxVal(gameState,0,alpha, beta)
+
+    util.raiseNotDefined()
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
